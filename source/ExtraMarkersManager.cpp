@@ -90,13 +90,13 @@ namespace LMU
 	{
 		RE::MapMenuMarker mapMarker
 		{
-			.data = nullptr,
+			.fullName = nullptr,
 			.ref = a_actorHandle.native_handle(),
-			.description = a_actor->GetDisplayFullName(),
-			.type = RE::MapMenuMarker::Type::kLocation, // Playing mind tricks with the game
+			.customMarker = a_actor->GetDisplayFullName(),
+			.type = 0, // Location marker type: playing mind tricks with the game
 			.door = 0,
 			.index = -1,
-			.quest = nullptr,
+			.form = nullptr,
 			.unk30 = 1
 		};
 
@@ -106,7 +106,7 @@ namespace LMU
 	void ExtraMarkersManager::AddExtraMarkers(RE::LocalMapMenu& a_localMapMenu)
 	{
 		RE::GFxValue extraMarkersData;
-		a_localMapMenu.GetRuntimeData().iconDisplay.GetMember("ExtraMarkerData", &extraMarkersData);
+		a_localMapMenu.GetRuntimeData().mapMovie.GetMember("ExtraMarkerData", &extraMarkersData);
 
 		if (!extraMarkersData.IsArray())
 		{

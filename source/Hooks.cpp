@@ -7,8 +7,7 @@
 #include "ShaderManager.h"
 
 #include "RE/G/GFxValue.h"
-#include "RE/S/StopHitEffectsVisitor.h"
-#include "RE/S/ShaderAccumulator.h"
+#include "RE/B/BSShaderAccumulator.h"
 
 bool FakeNotSmallWorld(RE::TESWorldSpace* a_worldSpace)
 {
@@ -48,7 +47,7 @@ bool InvokeCreateAndPostProcessMarkers(RE::GFxValue::ObjectInterface* a_objIface
 
 void SetupWaterShaderTechnique(RE::BSWaterShader* a_shader, std::uint32_t a_technique)
 {
-	if (RE::BSGraphics::BSShaderAccumulator::GetCurrentAccumulator()->GetRuntimeData().renderMode == 18)
+	if (RE::BSShaderAccumulator::GetCurrentAccumulator()->GetRuntimeData().renderMode == RE::BSShaderAccumulator::RENDER_MODE::kLocalMap)
 	{
 		// Fixes water flickering
 		a_technique &= ~0x802;
@@ -70,12 +69,12 @@ bool CanProcess(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::Inpu
 			// Show the place marker buttons
 			RE::GFxValue bottomBarSetDestinationButton;
 			RE::GFxValue bottomBar;
-			if (localMapMenu.root.GetMember("BottomBar", &bottomBar))
+			if (localMapMenu.localMapMovie.GetMember("BottomBar", &bottomBar))
 			{
 				bottomBar.GetMember("RightButton", &bottomBarSetDestinationButton);
 				bottomBarSetDestinationButton.SetMember("visible", true);
 			}
-			else if (localMapMenu.root.GetMember("_bottomBar", &bottomBar))
+			else if (localMapMenu.localMapMovie.GetMember("_bottomBar", &bottomBar))
 			{
 				RE::GFxValue buttonPanel;
 				bottomBar.GetMember("buttonPanel", &buttonPanel);
@@ -108,7 +107,7 @@ bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::B
 	bool isLocationFinderShown = false;
 
 	RE::GFxValue locationFinder;
-	localMapMenu.root.GetMember("_locationFinder", &locationFinder);
+	localMapMenu.localMapMovie.GetMember("_locationFinder", &locationFinder);
 	if (locationFinder.IsObject())
 	{
 		RE::GFxValue locationFinderShown;
@@ -144,8 +143,8 @@ bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::B
 				RE::MenuCursor::RUNTIME_DATA& menuCursor = RE::MenuCursor::GetSingleton()->GetRuntimeData();
 				RE::LocalMapMenu* localMapMenu = a_localMapInputHandler->localMapMenu;
 
-				if (menuCursor.cursorPosX > localMapMenu->topLeft.x && menuCursor.cursorPosX < localMapMenu->bottomRight.x &&
-					menuCursor.cursorPosY > localMapMenu->topLeft.y && menuCursor.cursorPosY < localMapMenu->bottomRight.y)
+				if (menuCursor.cursorPosX > localMapMenu->unk00030 && menuCursor.cursorPosX < localMapMenu->unk00038 &&
+					menuCursor.cursorPosY > localMapMenu->unk00034 && menuCursor.cursorPosY < localMapMenu->unk0003C)
 				{
 					if (buttonEvent->userEvent == userEvents->mapLookMode)
 					{
@@ -186,12 +185,12 @@ bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::B
 					{
 						RE::LocalMapMenu* localMapMenu = a_localMapInputHandler->localMapMenu;
 
-						float localMapViewWidth = localMapMenu->bottomRight.x - localMapMenu->topLeft.x;
-						float localMapViewHeight = localMapMenu->bottomRight.y - localMapMenu->topLeft.y;
+						float localMapViewWidth = localMapMenu->unk00038 - localMapMenu->unk00030;
+						float localMapViewHeight = localMapMenu->unk0003C - localMapMenu->unk00034;
 
 						// In VR, for gamepad users, use the center of the Local Map menu as reference
-						wndPointX = localMapMenu->topLeft.x + localMapViewWidth / 2;
-						wndPointY = localMapMenu->topLeft.y + localMapViewHeight / 2;
+						wndPointX = localMapMenu->unk00030 + localMapViewWidth / 2;
+						wndPointY = localMapMenu->unk00034 + localMapViewHeight / 2;
 					}
 					else
 					{

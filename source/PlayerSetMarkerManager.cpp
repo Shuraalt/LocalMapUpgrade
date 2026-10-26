@@ -106,11 +106,11 @@ namespace LMU
 	{
 		bool hit = false;
 
-		if (auto pick = RE::malloc<RE::NiPick>())
+		if (RE::NiPick::Ptr pickPtr = RE::NiPick::Create())
 		{
-			pick->Ctor();
-			pick->observeCull = true;
-			pick->type = RE::NiPick::PickType::kFindFirst;
+			RE::NiPick* pick = pickPtr.get();
+			pick->observeAppCullFlag = true;
+			pick->pickType = RE::NiPick::PickType::FIND_FIRST;
 
 			RE::TES* tes = RE::TES::GetSingleton();
 			RE::TESWorldSpace* worldSpace = tes->GetRuntimeData2().worldSpace;
@@ -119,7 +119,7 @@ namespace LMU
 			{
 				if (PickObjectInCell(pick, interiorCell, a_rayOrigin, a_rayDir))
 				{
-					a_rayCollision = pick->results[0]->intersect;
+					a_rayCollision = pick->pickResults[0]->intersect;
 					hit = true;
 				}
 			}
@@ -130,7 +130,7 @@ namespace LMU
 				{
 					if (PickObjectInCell(pick, skyCell, a_rayOrigin, a_rayDir))
 					{
-						a_rayCollision = pick->results[0]->intersect;
+						a_rayCollision = pick->pickResults[0]->intersect;
 						hit = true;
 					}
 				}
@@ -146,7 +146,7 @@ namespace LMU
 							{
 								if (PickObjectInCell(pick, cell, a_rayOrigin, a_rayDir))
 								{
-									a_rayCollision = pick->results[0]->intersect;
+									a_rayCollision = pick->pickResults[0]->intersect;
 									hit = true;
 								}
 							}
@@ -163,14 +163,12 @@ namespace LMU
 					pick->root = landRoot;
 					if (pick->PickObjects(a_rayOrigin, a_rayDir))
 					{
-						a_rayCollision = pick->results[0]->intersect;
+						a_rayCollision = pick->pickResults[0]->intersect;
 						hit = true;
 					}
 				}
 			}
 
-			pick->Dtor();
-			RE::free(pick);
 		}
 
 		return hit;
@@ -179,11 +177,11 @@ namespace LMU
 	void PlaceMarkerImmediate(RE::LocalMapMenu* a_localMapMenu, float a_wndPointX, float a_wndPointY)
 	{
 		RE::NiCamera* localMapCamera = a_localMapMenu->localCullingProcess.GetLocalMapCamera()->camera.get();
-		float localMapViewWidth = a_localMapMenu->bottomRight.x - a_localMapMenu->topLeft.x;
-		float localMapViewHeight = a_localMapMenu->bottomRight.y - a_localMapMenu->topLeft.y;
+		float localMapViewWidth = a_localMapMenu->unk00038 - a_localMapMenu->unk00030;
+		float localMapViewHeight = a_localMapMenu->unk0003C - a_localMapMenu->unk00034;
 
-		float wndPointX = a_wndPointX - a_localMapMenu->topLeft.x;
-		float wndPointY = a_wndPointY - a_localMapMenu->topLeft.y;
+		float wndPointX = a_wndPointX - a_localMapMenu->unk00030;
+		float wndPointY = a_wndPointY - a_localMapMenu->unk00034;
 
 		RE::NiPoint3 rayOrigin;
 		RE::NiPoint3 rayDir;

@@ -1,9 +1,11 @@
 #pragma once
 
 #include "RE/G/GFxPlayerStats.h"
+#include "RE/G/GMatrix2D.h"
 #include "RE/G/GMatrix3D.h"
 #include "RE/G/GMemory.h"
 #include "RE/G/GNewOverrideBase.h"
+#include "RE/G/GRenderer.h"
 #include "RE/G/GStats.h"
 #include "RE/G/GString.h"
 
@@ -185,26 +187,26 @@ namespace RE
 			void ClearFlags(Flag a_flags);
 
 			// members
-			double                                _x;              // 00
-			double                                _y;              // 08
-			double                                _rotation;       // 10
-			double                                _xScale;         // 18
-			double                                _yScale;         // 20
-			double                                _alpha;          // 28
-			bool                                  _visible;        // 30
-			std::uint8_t                          _pad31;          // 31
-			std::uint16_t                         _pad32;          // 32
-			std::uint32_t                         _pad34;          // 34
-			double                                _z;              // 38
-			double                                _xRotation;      // 40
-			double                                _yRotation;      // 48
-			double                                _zScale;         // 50
-			double                                _fov;            // 58
-			GMatrix3D                             _viewMatrix3D;   // 60
-			GMatrix3D                             _perspMatrix3D;  // A0
-			stl::enumeration<Flag, std::uint16_t> _flags;          // E0
-			std::uint16_t                         _padD2;          // E2
-			std::uint32_t                         _padD4;          // E4
+			double                            _x = 0.0;              // 00
+			double                            _y = 0.0;              // 08
+			double                            _rotation = 0.0;       // 10
+			double                            _xScale = 0.0;         // 18
+			double                            _yScale = 0.0;         // 20
+			double                            _alpha = 0.0;          // 28
+			bool                              _visible = false;      // 30
+			std::uint8_t                      _pad31 = 0;            // 31
+			std::uint16_t                     _pad32 = 0;            // 32
+			std::uint32_t                     _pad34 = 0;            // 34
+			double                            _z = 0.0;              // 38
+			double                            _xRotation = 0.0;      // 40
+			double                            _yRotation = 0.0;      // 48
+			double                            _zScale = 0.0;         // 50
+			double                            _fov = 0.0;            // 58
+			GMatrix3D                         _viewMatrix3D;         // 60
+			GMatrix3D                         _perspMatrix3D;        // A0
+			REX::EnumSet<Flag, std::uint16_t> _flags = Flag::kNone;  // E0
+			std::uint16_t                     _padD2 = 0;            // E2
+			std::uint32_t                     _padD4 = 0;            // E4
 		};
 		static_assert(sizeof(DisplayInfo) == 0xE8);
 
@@ -245,24 +247,25 @@ namespace RE
 			bool          SetArraySize(void* a_data, std::uint32_t a_size);
 			bool          GetElement(void* a_data, std::uint32_t a_idx, GFxValue* a_val) const;
 			bool          SetElement(void* a_data, std::uint32_t a_idx, const GFxValue& a_val);
-			void          VisitElements(void* a_data, ArrVisitor* a_visitor, std::uint32_t a_idx, const GFxValue& a_val) const;
 			bool          PushBack(void* a_data, const GFxValue& a_value);
 			bool          RemoveElements(void* a_data, std::uint32_t a_idx, std::int32_t a_count);
 
 			bool GetDisplayInfo(void* a_data, DisplayInfo* a_info) const;
 			bool SetDisplayInfo(void* a_data, const DisplayInfo& a_info);
+			bool GetDisplayMatrix(void* a_data, GMatrix2D* a_mat) const;
+			bool SetDisplayMatrix(void* a_data, const GMatrix2D& a_mat);
+			bool GetCxform(void* a_data, GRenderer::Cxform* a_cx) const;
+			bool SetCxform(void* a_data, const GRenderer::Cxform& a_cx);
 
 			bool SetText(void* a_data, const char* a_text, bool a_isHTML);
 
-			bool CreateEmptyMovieClip(void* a_data, GFxValue* a_movieClip, const char* a_instanceName, std::int32_t a_depth);
 			bool AttachMovie(void* a_data, GFxValue* a_movieClip, const char* a_symbolName, const char* a_instanceName, std::int32_t a_depth, const GFxValue* a_initObj);
+			bool CreateEmptyMovieClip(void* a_data, GFxValue* a_movieClip, const char* a_instanceName, std::int32_t a_depth);
 			bool GotoAndPlay(void* a_data, const char* a_frame, bool a_stop);
-			bool GotoAndPlay(void* a_data, std::uint32_t a_frame, bool a_stop);
 
 			bool IsSameContext(const ObjectInterface* a_rhs) const;
 
-			void ToString(GString* pstr, const GFxValue& thisVal) const;
-
+		protected:
 			// members
 			GFxMovieRoot* _movieRoot;  // 0
 		};
@@ -270,6 +273,8 @@ namespace RE
 
 		using ObjectVisitor = ObjectInterface::ObjVisitor;
 		using ArrayVisitor = ObjectInterface::ArrVisitor;
+
+		using ObjectVisitFn = std::function<void(const char*, const RE::GFxValue&)>;
 
 		GFxValue();
 		GFxValue(ValueType a_rhs);
@@ -355,8 +360,9 @@ namespace RE
 		bool SetMember(const char* a_name, const GFxValue& a_val);
 		bool Invoke(const char* a_name, GFxValue* a_result, const GFxValue* a_args, UPInt a_numArgs);
 		bool Invoke(const char* a_name, GFxValue* a_result = nullptr);
-		void VisitMembers(ObjectVisitor* a_visitor) const;
 		bool DeleteMember(const char* a_name);
+		void VisitMembers(ObjectVisitor* a_visitor) const;
+		void VisitMembers(ObjectVisitFn&& a_visitor) const;
 
 		template <std::size_t N>
 		inline bool Invoke(const char* a_name, const std::array<GFxValue, N>& a_args)
@@ -375,8 +381,6 @@ namespace RE
 		bool                        SetArraySize(std::uint32_t a_size);
 		bool                        GetElement(std::uint32_t a_idx, GFxValue* a_val) const;
 		bool                        SetElement(std::uint32_t a_idx, const GFxValue& a_val);
-		void                        VisitElements(ArrayVisitor* a_visitor, std::uint32_t a_idx, std::int16_t a_count = -1) const;
-		void                        VisitElements(ArrayVisitor* a_visitor) const;
 		bool                        PushBack(const GFxValue& a_val);
 		bool                        RemoveElements(std::uint32_t a_idx, std::int32_t a_count = -1);
 		bool                        RemoveElement(std::uint32_t a_idx);
@@ -385,22 +389,41 @@ namespace RE
 		// AS MovieClips, Buttons, TextFields support. Valid for DisplayObject type
 		bool GetDisplayInfo(DisplayInfo* a_info) const;
 		bool SetDisplayInfo(const DisplayInfo& a_info);
+		bool GetDisplayMatrix(GMatrix2D* a_mat) const;
+		bool SetDisplayMatrix(const GMatrix2D& a_mat);
+		bool GetCxform(GRenderer::Cxform* a_cx) const;
+		bool SetCxform(const GRenderer::Cxform& a_cx);
 
 		// AS TextField support. Valid for DisplayObject type.
 		bool SetText(const char* a_text);
 		bool SetTextHTML(const char* a_html);
 
 		// AS MovieClip support. Valid for MovieClips.
-		bool CreateEmptyMovieClip(GFxValue* a_movieClip, const char* a_instanceName, std::int32_t a_depth = -1);
 		bool AttachMovie(GFxValue* a_movieClip, const char* a_symbolName, const char* a_instanceName, std::int32_t a_depth = -1, const GFxValue* a_initObj = nullptr);
+		bool CreateEmptyMovieClip(GFxValue* a_movieClip, const char* a_instanceName, std::int32_t a_depth = -1);
 		bool GotoAndPlay(const char* a_frame);
 		bool GotoAndStop(const char* a_frame);
 
-		bool GotoAndPlay(std::uint32_t a_frame);
-		bool GotoAndStop(std::uint32_t a_frame);
+		/// <summary>
+		/// Applies a color tint to this display object by modifying its color transform.
+		/// The tint is applied by blending the object's colors toward the specified tint color.
+		/// The alpha channel of the color determines the intensity of the tint (0 = no tint, 255 = full tint).
+		/// </summary>
+		/// <param name="a_tint">The color to tint toward. Alpha channel determines intensity (0-255)</param>
+		/// <returns>True if the color transform was successfully applied, false otherwise</returns>
+		bool SetColorTint(const GColor& a_tint);
+
+		/// <summary>
+		/// Removes any color tint from this display object by resetting its color transform to identity.
+		/// This restores the original colors of the display object.
+		/// </summary>
+		/// <returns>True if the color transform was successfully reset, false otherwise</returns>
+		bool RemoveColorTint();
 
 		GFC_MEMORY_REDEFINE_NEW(GFxValue, GStatGroups::kGStatGroup_Default);
 
+	// LocalMapUpgrade builds GFxValues by hand, so the members must be accessible
+	public:
 		[[nodiscard]] bool IsManagedValue() const;
 		void               AcquireManagedValue(const GFxValue& a_rhs);
 		void               ReleaseManagedValue();
@@ -423,10 +446,10 @@ namespace RE
 		static_assert(sizeof(ValueUnion) == 0x8);
 
 		// members
-		ObjectInterface*                           _objectInterface;  // 00
-		stl::enumeration<ValueType, std::uint32_t> _type;             // 08
-		std::uint32_t                              _pad0C;            // 0C
-		ValueUnion                                 _value;            // 10
+		ObjectInterface*                       _objectInterface;  // 00
+		REX::EnumSet<ValueType, std::uint32_t> _type;             // 08
+		std::uint32_t                          _pad0C;            // 0C
+		ValueUnion                             _value;            // 10
 	};
 	static_assert(sizeof(GFxValue) == 0x18);
 }
