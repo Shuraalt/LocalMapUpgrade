@@ -24,7 +24,9 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 
 	SKSE::Init(a_skse);
 
+	logger::info("Reading settings...");
 	settings::Init(std::string(plugin->GetName()) + ".ini");
+	logger::info("Settings read.");
 
 	logger::set_level(settings::debug::logLevel, settings::debug::logLevel);
 
@@ -33,6 +35,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* a_skse)
 		return false;
 	}
 
+	logger::info("Installing hooks...");
 	hooks::Install();
 
 	logger::set_level(logger::level::info, logger::level::info);
