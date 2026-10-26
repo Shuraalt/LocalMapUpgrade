@@ -50,7 +50,7 @@ namespace utils
 		template <>
 		std::int32_t GetSetting<std::int32_t>(const char* a_name) const
 		{
-			return GetSetting(a_name)->GetSInt();
+			return GetSetting(a_name)->GetInteger();
 		}
 		template <>
 		RE::Color GetSetting<RE::Color>(const char* a_name) const
@@ -65,7 +65,7 @@ namespace utils
 		template <>
 		std::uint32_t GetSetting<std::uint32_t>(const char* a_name) const
 		{
-			return GetSetting(a_name)->GetUInt();
+			return GetSetting(a_name)->GetUnsignedInteger();
 		}
 
 		bool ReadFromFile(std::string_view a_fileName);
