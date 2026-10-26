@@ -2,12 +2,13 @@
 
 #include "RE/L/LocalMapMenu.h"
 #include "RE/N/NiPick.h"
+#include "RE/T/TeleportPath.h"
 
 #undef MessageBox
 
 namespace RE
 {
-	void PlayerCharacter__SetMarkerTeleportData(PlayerCharacter* a_player, TESObjectREFR* a_marker, PlayerCharacter::TeleportPath* a_teleportPath, bool a_ignoreLocks)
+	void PlayerCharacter__SetMarkerTeleportData(PlayerCharacter* a_player, TESObjectREFR* a_marker, TeleportPath* a_teleportPath, bool a_ignoreLocks)
 	{
 		using func_t = decltype(&PlayerCharacter__SetMarkerTeleportData);
 		static REL::Relocation<func_t> func{ REL::VariantID(39441, 40517, 0x6C4D30) };
@@ -203,7 +204,7 @@ namespace LMU
 				}
 
 				RE::ObjectRefHandle playerMapMarker = REL::Module::IsVR() ? player->GetVRInfoRuntimeData()->playerMapMarker : player->GetInfoRuntimeData().playerMapMarker;
-				RE::PlayerCharacter::TeleportPath* playerMarkerTeleportPath = REL::Module::IsVR() ? player->GetVRInfoRuntimeData()->playerMarkerPath : player->GetInfoRuntimeData().playerMarkerPath;
+				RE::TeleportPath* playerMarkerTeleportPath = REL::Module::IsVR() ? player->GetVRInfoRuntimeData()->playerMarkerPath : player->GetInfoRuntimeData().playerMarkerPath;
 
 				if (playerMapMarker && playerMarkerTeleportPath)
 				{
@@ -227,7 +228,7 @@ namespace LMU
 		}
 	}
 
-	void PlayerSetMarkerManager::MessageBox::Callback::Run(Message a_optionIndex)
+	void PlayerSetMarkerManager::MessageBox::Callback::Run(std::uint8_t a_optionIndex)
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
 

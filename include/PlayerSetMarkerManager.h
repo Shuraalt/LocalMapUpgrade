@@ -13,7 +13,7 @@ namespace LMU
 		{
 			struct Callback : RE::IMessageBoxCallback
 			{
-				void Run(Message a_optionIndex) final;
+				void Run(std::uint8_t a_optionIndex) final;
 
 				void SetData(RE::LocalMapMenu* a_localMapMenu, float a_wndPointX, float a_wndPointY)
 				{

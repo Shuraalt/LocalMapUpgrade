@@ -265,7 +265,7 @@ namespace RE
 
 			bool IsSameContext(const ObjectInterface* a_rhs) const;
 
-		protected:
+		public:  // LocalMapUpgrade reads the movie root of hand-built values
 			// members
 			GFxMovieRoot* _movieRoot;  // 0
 		};

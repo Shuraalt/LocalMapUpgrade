@@ -130,7 +130,7 @@ bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::B
 					device == RE::INPUT_DEVICE::kOculusSecondary ||
 					device == RE::INPUT_DEVICE::kWMRSecondary)
 				{
-					if (buttonEvent->userEvent == userEvents->click)
+					if (buttonEvent->GetUserEvent() == userEvents->click)
 					{
 						skipVanillaProcessButton = true;
 					}
@@ -146,13 +146,13 @@ bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::B
 				if (menuCursor.cursorPosX > localMapMenu->unk00030 && menuCursor.cursorPosX < localMapMenu->unk00038 &&
 					menuCursor.cursorPosY > localMapMenu->unk00034 && menuCursor.cursorPosY < localMapMenu->unk0003C)
 				{
-					if (buttonEvent->userEvent == userEvents->mapLookMode)
+					if (buttonEvent->GetUserEvent() == userEvents->mapLookMode)
 					{
-						buttonEvent->userEvent = userEvents->localMapMoveMode;
+						buttonEvent->SetUserEvent(userEvents->localMapMoveMode);
 					}
-					else if (buttonEvent->userEvent == userEvents->localMapMoveMode)
+					else if (buttonEvent->GetUserEvent() == userEvents->localMapMoveMode)
 					{
-						buttonEvent->userEvent = userEvents->click;
+						buttonEvent->SetUserEvent(userEvents->click);
 					}
 				}
 			}
@@ -165,14 +165,14 @@ bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::B
 	{
 		if (buttonEvent)
 		{
-			if ((buttonEvent->userEvent == userEvents->click
+			if ((buttonEvent->GetUserEvent() == userEvents->click
 #ifdef ENABLE_SKYRIM_VR
 				&& (REL::Module::IsVR() &&
 					(device == RE::INPUT_DEVICE::kViveSecondary ||
 					 device == RE::INPUT_DEVICE::kOculusSecondary ||
 					 device == RE::INPUT_DEVICE::kWMRSecondary))
 #endif
-				) || buttonEvent->userEvent == userEvents->placePlayerMarker)
+				) || buttonEvent->GetUserEvent() == userEvents->placePlayerMarker)
 			{
 				auto playerSetMarkerManager = LMU::PlayerSetMarkerManager::GetSingleton();
 
@@ -214,19 +214,19 @@ bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::B
 			{
 				RE::LocalMapCamera* localMapCamera = a_localMapInputHandler->localMapMenu->localCullingProcess.GetLocalMapCamera();
 
-				if (buttonEvent->userEvent == userEvents->up)
+				if (buttonEvent->GetUserEvent() == userEvents->up)
 				{
 					localMapCamera->translationInput.y += settings::mapmenu::localMapKeyboardPanSpeed;
 				}
-				else if (buttonEvent->userEvent == userEvents->down)
+				else if (buttonEvent->GetUserEvent() == userEvents->down)
 				{
 					localMapCamera->translationInput.y -= settings::mapmenu::localMapKeyboardPanSpeed;
 				}
-				else if (buttonEvent->userEvent == userEvents->left)
+				else if (buttonEvent->GetUserEvent() == userEvents->left)
 				{
 					localMapCamera->translationInput.x -= settings::mapmenu::localMapKeyboardPanSpeed;
 				}
-				else if (buttonEvent->userEvent == userEvents->right)
+				else if (buttonEvent->GetUserEvent() == userEvents->right)
 				{
 					localMapCamera->translationInput.x += settings::mapmenu::localMapKeyboardPanSpeed;
 				}
