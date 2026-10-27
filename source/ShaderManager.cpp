@@ -25,7 +25,7 @@ namespace LMU
 
 	ShaderManager::ShaderManager()
 	{
-		std::uint32_t isLocalMapIndex = REL::Module::IsVR() ? RE::VR::ImageSpaceManager::ISLocalMap : RE::ImageSpaceManager::ISLocalMap;
+		std::uint32_t isLocalMapIndex = RE::ImageSpaceManager::GetCurrentIndex(RE::ImageSpaceManager::ISLocalMap);
 
 		RE::ImageSpaceEffect* localMapShaderEffect = RE::ImageSpaceManager::GetSingleton()->effects[isLocalMapIndex];
 
