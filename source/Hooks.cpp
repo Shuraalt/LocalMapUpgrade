@@ -42,10 +42,6 @@ void AddExtraAndQuestMarkersToMap(RE::BSTArray<RE::MapMenuMarker>& a_mapMarkers,
 
 	if (!extraMarkersDisabled)
 	{
-		auto& movie = localMapMenu.GetRuntimeData().mapMovie;
-		logger::info("AddExtraMarkers: menu={:p} mapMovie interface={:p} type={}",
-					 static_cast<void*>(&localMapMenu), static_cast<void*>(movie._objectInterface), static_cast<std::uint32_t>(movie._type.get()));
-
 		if (!TryAddExtraMarkers(localMapMenu))
 		{
 			extraMarkersDisabled = true;
@@ -92,19 +88,18 @@ bool CanProcess(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::Inpu
 
 	if (!REL::Module::IsVR())
 	{
-		RE::LocalMapMenu::RUNTIME_DATA& localMapMenu = a_localMapInputHandler->localMapMenu->GetRuntimeData();
-
-		if (localMapMenu.showingMap && localMapMenu.controlsReady)
+		RE::GFxValue localMapRoot;
+		if (LMU::ExtraMarkersManager::GetMapMenuVariable(localMapRoot, "_level0.WorldMap.LocalMapMenu") && localMapRoot.IsObject())
 		{
 			// Show the place marker buttons
 			RE::GFxValue bottomBarSetDestinationButton;
 			RE::GFxValue bottomBar;
-			if (localMapMenu.localMapMovie.GetMember("BottomBar", &bottomBar))
+			if (localMapRoot.GetMember("BottomBar", &bottomBar))
 			{
 				bottomBar.GetMember("RightButton", &bottomBarSetDestinationButton);
 				bottomBarSetDestinationButton.SetMember("visible", true);
 			}
-			else if (localMapMenu.localMapMovie.GetMember("_bottomBar", &bottomBar))
+			else if (localMapRoot.GetMember("_bottomBar", &bottomBar))
 			{
 				RE::GFxValue buttonPanel;
 				bottomBar.GetMember("buttonPanel", &buttonPanel);
@@ -129,15 +124,17 @@ bool CanProcess(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::Inpu
 
 bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::ButtonEvent* a_event)
 {
-	RE::LocalMapMenu::RUNTIME_DATA& localMapMenu = a_localMapInputHandler->localMapMenu->GetRuntimeData();
-
 	RE::ButtonEvent* buttonEvent = a_event->AsButtonEvent();
 	RE::INPUT_DEVICE device = buttonEvent->GetDevice();
 
 	bool isLocationFinderShown = false;
 
+	RE::GFxValue localMapRoot;
 	RE::GFxValue locationFinder;
-	localMapMenu.localMapMovie.GetMember("_locationFinder", &locationFinder);
+	if (LMU::ExtraMarkersManager::GetMapMenuVariable(localMapRoot, "_level0.WorldMap.LocalMapMenu") && localMapRoot.IsObject())
+	{
+		localMapRoot.GetMember("_locationFinder", &locationFinder);
+	}
 	if (locationFinder.IsObject())
 	{
 		RE::GFxValue locationFinderShown;
@@ -149,7 +146,7 @@ bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::B
 
 	bool skipVanillaProcessButton = false;
 
-	if (localMapMenu.showingMap && localMapMenu.controlsReady && !isLocationFinderShown)
+	if (localMapRoot.IsObject() && !isLocationFinderShown)
 	{
 		if (buttonEvent)
 		{
@@ -191,7 +188,7 @@ bool ProcessButton(RE::LocalMapMenu::InputHandler* a_localMapInputHandler, RE::B
 
 	bool retval = skipVanillaProcessButton ? false : hooks::LocalMapMenu::InputHandler::ProcessButton(a_localMapInputHandler, a_event);
 
-	if (localMapMenu.showingMap && localMapMenu.controlsReady && !isLocationFinderShown)
+	if (localMapRoot.IsObject() && !isLocationFinderShown)
 	{
 		if (buttonEvent)
 		{

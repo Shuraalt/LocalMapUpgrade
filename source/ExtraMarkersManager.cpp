@@ -103,10 +103,28 @@ namespace LMU
 		a_mapMarkers.push_back(mapMarker);
 	}
 
+	bool ExtraMarkersManager::GetMapMenuVariable(RE::GFxValue& a_out, const char* a_path)
+	{
+		RE::UI* ui = RE::UI::GetSingleton();
+		if (!ui)
+		{
+			return false;
+		}
+
+		auto movie = ui->GetMovieView(RE::MapMenu::MENU_NAME);
+		return movie && movie->GetVariable(&a_out, a_path);
+	}
+
 	void ExtraMarkersManager::AddExtraMarkers(RE::LocalMapMenu& a_localMapMenu)
 	{
+		RE::GFxValue iconDisplay;
+		if (!GetMapMenuVariable(iconDisplay, "_level0.WorldMap.LocalMapMenu.IconDisplay") || !iconDisplay.IsObject())
+		{
+			return;
+		}
+
 		RE::GFxValue extraMarkersData;
-		a_localMapMenu.GetRuntimeData().mapMovie.GetMember("ExtraMarkerData", &extraMarkersData);
+		iconDisplay.GetMember("ExtraMarkerData", &extraMarkersData);
 
 		if (!extraMarkersData.IsArray())
 		{

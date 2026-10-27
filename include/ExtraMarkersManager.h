@@ -55,6 +55,10 @@ namespace LMU
 
 		void AddExtraMarkers(RE::LocalMapMenu& a_localMapMenu);
 
+		// Looks a value up in the map menu's movie by path. Used instead of the LocalMapMenu runtime data,
+		// whose position in memory is not reliable across game versions.
+		static bool GetMapMenuVariable(RE::GFxValue& a_out, const char* a_path);
+
 		void PostCreateMarkers(RE::GFxValue& a_iconDisplay);
 
 		std::uint32_t GetAliveActorsDisplayRadius() const { return aliveActorsDisplayRadius / feetToUnits; }

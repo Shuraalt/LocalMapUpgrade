@@ -85,7 +85,7 @@ namespace hooks
 		};
 	};
 
-	inline REL::Relocation<void (*)(RE::BSTArray<RE::MapMenuMarker>&, RE::BSTArray<RE::BGSInstancedQuestObjective>, std::uint32_t)> AddQuestMarkersToMap;
+	inline REL::Relocation<void (*)(RE::BSTArray<RE::MapMenuMarker>&, RE::BSTArray<RE::BGSInstancedQuestObjective>&, std::uint32_t)> AddQuestMarkersToMap;
 
 	class ScriptEffect
 	{
