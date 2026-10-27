@@ -172,14 +172,14 @@ namespace hooks
 
 			if (op[0] != 0xE8)
 			{
-				logger::warn("Hook site \"{}\" is not a call in this game version, skipping it", a_name);
+				SKSE::log::warn("Hook site \"{}\" is not a call in this game version, skipping it", a_name);
 				return false;
 			}
 
 			const std::uintptr_t target = a_site + 5 + *reinterpret_cast<const std::int32_t*>(op + 1);
 			if (target < text.address() || target >= text.address() + text.size())
 			{
-				logger::warn("Hook site \"{}\" calls outside the game code, skipping it", a_name);
+				SKSE::log::warn("Hook site \"{}\" calls outside the game code, skipping it", a_name);
 				return false;
 			}
 
