@@ -16,12 +16,42 @@ bool FakeNotSmallWorld(RE::TESWorldSpace* a_worldSpace)
 	return false;
 }
 
+namespace
+{
+	bool extraMarkersDisabled = false;
+
+	// Kept free of C++ objects with destructors so that __try is allowed
+	bool TryAddExtraMarkers(RE::LocalMapMenu& a_localMapMenu)
+	{
+		__try
+		{
+			LMU::ExtraMarkersManager::GetSingleton()->AddExtraMarkers(a_localMapMenu);
+			return true;
+		}
+		__except (GetExceptionCode() == EXCEPTION_ACCESS_VIOLATION ? EXCEPTION_EXECUTE_HANDLER : EXCEPTION_CONTINUE_SEARCH)
+		{
+			return false;
+		}
+	}
+}
+
 void AddExtraAndQuestMarkersToMap(RE::BSTArray<RE::MapMenuMarker>& a_mapMarkers, RE::BSTArray<RE::BGSInstancedQuestObjective>& a_objectives,
 								  std::uint32_t a_arg3)
 {
 	auto& localMapMenu = *(RE::LocalMapMenu*)((std::uintptr_t)&a_mapMarkers - offsetof(RE::LocalMapMenu, mapMarkers));
 
-	LMU::ExtraMarkersManager::GetSingleton()->AddExtraMarkers(localMapMenu);
+	if (!extraMarkersDisabled)
+	{
+		auto& movie = localMapMenu.GetRuntimeData().mapMovie;
+		logger::info("AddExtraMarkers: menu={:p} mapMovie interface={:p} type={}",
+					 static_cast<void*>(&localMapMenu), static_cast<void*>(movie._objectInterface), static_cast<std::uint32_t>(movie._type.get()));
+
+		if (!TryAddExtraMarkers(localMapMenu))
+		{
+			extraMarkersDisabled = true;
+			logger::error("AddExtraMarkers crashed (access violation); extra actor markers are disabled for this session");
+		}
+	}
 
 	hooks::AddQuestMarkersToMap(a_mapMarkers, a_objectives, a_arg3);
 }
