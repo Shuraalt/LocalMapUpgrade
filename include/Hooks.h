@@ -163,9 +163,43 @@ namespace hooks
 			invokeCreateMarkersHook.getSize()
 		};
 
-		TESWorldSpace::IsSmallWorld = defaultTrampoline.write_call(isSmallWorldHook);
-		AddQuestMarkersToMap = defaultTrampoline.write_call(addQuestMarkersToMapHook);
-		GFxValue::ObjectInterface::Invoke = defaultTrampoline.write_call(invokeCreateMarkersHook);
+		// These hooks patch calls at fixed offsets inside game functions. If the game executable changed, the offset may
+		// not point at a call anymore, and patching it would break the game. Only patch when it still looks like a call.
+		auto isCallSiteValid = [](std::uintptr_t a_site, const char* a_name) -> bool
+		{
+			const auto text = REL::Module::get().segment(REL::Segment::textx);
+			const auto op = reinterpret_cast<const std::uint8_t*>(a_site);
+
+			if (op[0] != 0xE8)
+			{
+				logger::warn("Hook site \"{}\" is not a call in this game version, skipping it", a_name);
+				return false;
+			}
+
+			const std::uintptr_t target = a_site + 5 + *reinterpret_cast<const std::int32_t*>(op + 1);
+			if (target < text.address() || target >= text.address() + text.size())
+			{
+				logger::warn("Hook site \"{}\" calls outside the game code, skipping it", a_name);
+				return false;
+			}
+
+			return true;
+		};
+
+		if (isCallSiteValid(isSmallWorldHook.getSrc(), "IsSmallWorld"))
+		{
+			TESWorldSpace::IsSmallWorld = defaultTrampoline.write_call(isSmallWorldHook);
+		}
+
+		if (isCallSiteValid(addQuestMarkersToMapHook.getSrc(), "AddQuestMarkersToMap"))
+		{
+			AddQuestMarkersToMap = defaultTrampoline.write_call(addQuestMarkersToMapHook);
+		}
+
+		if (isCallSiteValid(invokeCreateMarkersHook.getSrc(), "InvokeCreateMarkers"))
+		{
+			GFxValue::ObjectInterface::Invoke = defaultTrampoline.write_call(invokeCreateMarkersHook);
+		}
 
 		LocalMapMenu::InputHandler::CanProcess = LocalMapMenu::InputHandler::vTable.write_vfunc(1, CanProcess);
 		
